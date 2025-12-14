@@ -3,12 +3,15 @@ package com.digitilius.jmix.addon.component;
 import com.digitilius.jmix.addon.ApplicationContextProvider;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
+import io.jmix.flowui.data.SupportsValueSource;
+import io.jmix.flowui.data.ValueSource;
 import io.jmix.flowui.model.CollectionLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActiveOnlyCheckbox extends JmixCheckbox {
+public class ActiveOnlyCheckbox extends JmixCheckbox implements SupportsValueSource<Boolean> {
 
     private static final Logger log = LoggerFactory.getLogger(ActiveOnlyCheckbox.class);
 
@@ -20,10 +23,18 @@ public class ActiveOnlyCheckbox extends JmixCheckbox {
     private OrderDirection orderDirection = OrderDirection.ASC;
     private boolean initialValue = false;
 
+    private String queryActiveOnly;
+    private String queryAll;
+
     private boolean listenerAttached = false;
+    private boolean queriesInitialized = false;
 
     public void setLoader(CollectionLoader<?> loader) {
         this.loader = loader;
+    }
+
+    public CollectionLoader<?> getLoader() {
+        return loader;
     }
 
     public void setDataLoader(String dataLoader) {
@@ -34,8 +45,16 @@ public class ActiveOnlyCheckbox extends JmixCheckbox {
         this.activeField = activeField;
     }
 
+    public String getActiveField() {
+        return activeField;
+    }
+
     public void setOrderByField(String orderByField) {
         this.orderByField = orderByField;
+    }
+
+    public String getOrderByField() {
+        return orderByField;
     }
 
     public void setInitialValue(boolean initialValue) {
@@ -75,14 +94,26 @@ public class ActiveOnlyCheckbox extends JmixCheckbox {
             setLabel(label);
         }
         setValue(initialValue);
+
     }
 
     private void applyFilter(boolean activeOnly) {
-        if (loader == null) {
-            log.warn("applyFilter called but loader is not set");
-            return;
+        if (!queriesInitialized) {
+            queryActiveOnly = buildQuery(true);
+            queryAll = buildQuery(false);
+            queriesInitialized = true;
         }
 
+        String query = activeOnly ? queryActiveOnly : queryAll;
+        loader.setQuery(query);
+        try {
+            loader.load();
+        } catch (Exception ex) {
+            log.error("Failed to load data for loader (query: {}). Exception: {}", query, ex.getMessage(), ex);
+        }
+    }
+
+    private String buildQuery(boolean activeOnly) {
         MetaClass metaClass = loader.getContainer().getEntityMetaClass();
         String entityName = metaClass.getName();
 
@@ -91,7 +122,7 @@ public class ActiveOnlyCheckbox extends JmixCheckbox {
                 .append(" e");
 
         if (activeOnly) {
-            sb.append(" where e.").append(activeField).append(" = :").append(activeField);
+            sb.append(" where e.").append(activeField).append(" = true");
         }
 
         if (orderByField != null) {
@@ -101,23 +132,7 @@ public class ActiveOnlyCheckbox extends JmixCheckbox {
             }
         }
 
-        String query = sb.toString();
-
-        if (activeOnly) {
-            loader.setParameter(activeField, true);
-        } else {
-            try {
-                loader.removeParameter(activeField);
-            } catch (Exception ignored) {
-            }
-        }
-
-        loader.setQuery(query);
-        try {
-            loader.load();
-        } catch (Exception ex) {
-            log.error("Failed to load data for loader (query: {}). Exception: {}", query, ex.getMessage(), ex);
-        }
+        return sb.toString();
     }
 
 }

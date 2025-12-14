@@ -27,56 +27,50 @@ subprojects {
         projectId = 'aoc'
     }
 
-    group = this.group
-    version = this.version
+    group = rootProject.group
+    version = rootProject.version
 
-    def archName = null
-    if (project.hasProperty('archivesBaseName')) {
-        archName = project.property('archivesBaseName').toString()
-    } else {
-        archName = project.name
-    }
+    def archName = project.findProperty('archivesBaseName')?.toString() ?: project.name
 
     java {
         withSourcesJar()
     }
 
-    if (project.plugins.hasPlugin('java') || project.plugins.hasPlugin('java-library')) {
-        publishing {
-            repositories {
-                maven {
-                    // --- ЗАМЕНИТЕ OWNER и REPO на ваши значения ---
-                    url = uri("https://maven.pkg.github.com/stasmakarov/REPO")
-                    credentials {
-                        username = project.findProperty('gpr.user') ?: System.getenv('GPR_USER') ?: System.getenv('GITHUB_ACTOR')
-                        password = project.findProperty('gpr.token') ?: System.getenv('GPR_TOKEN') ?: System.getenv('GITHUB_TOKEN')
-                    }
+    publishing {
+        repositories {
+            maven {
+                url = uri("https://maven.pkg.github.com/stasmakarov/active-only-checkbox-jmix")
+                credentials {
+                    username = project.findProperty('gpr.user')
+                            ?: System.getenv('GPR_USER')
+                            ?: System.getenv('GITHUB_ACTOR')
+                    password = project.findProperty('gpr.token')
+                            ?: System.getenv('GPR_TOKEN')
+                            ?: System.getenv('GITHUB_TOKEN')
                 }
             }
-            publications {
-                javaMaven(MavenPublication) {
-                    artifactId = archName
-                    from components.java
+        }
 
-                    artifact tasks.named('sourcesJar').get()
+        publications {
+            javaMaven(MavenPublication) {
+                artifactId = archName
+                from components.java
 
-                    // minimal pom metadata — заполните под ваш проект
-                    pom {
-                        name = project.name
-                        description = 'Jmix add-on: Active-only checkbox'
-                        url = 'https://github.com/OWNER/REPO'
-                        licenses {
-                            license {
-                                name = 'The Apache License, Version 2.0'
-                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                            }
+                pom {
+                    name = project.name
+                    description = 'Jmix add-on: Active-only checkbox'
+                    url = 'https://github.com/stasmakarov/active-only-checkbox-jmix'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
-                        developers {
-                            developer {
-                                id = 'your-id'
-                                name = 'Your Name'
-                                email = 'you@example.com'
-                            }
+                    }
+                    developers {
+                        developer {
+                            id = 'stasmakarov'
+                            name = 'Stas Makarov'
+                            email = 's.makarov@haulmont.com'
                         }
                     }
                 }
@@ -89,7 +83,7 @@ subprojects {
         enabled = false
     }
 
-    project.tasks.withType(JavaCompile).configureEach {
+    tasks.withType(JavaCompile).configureEach {
         options.compilerArgs.add("-parameters")
     }
 }

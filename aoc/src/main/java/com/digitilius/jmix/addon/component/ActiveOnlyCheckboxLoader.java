@@ -1,12 +1,12 @@
 package com.digitilius.jmix.addon.component;
 
+import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.flowui.exception.GuiDevelopmentException;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.DataLoader;
 import io.jmix.flowui.xml.layout.loader.AbstractComponentLoader;
 import io.jmix.flowui.xml.layout.support.DataLoaderSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 
 public class ActiveOnlyCheckboxLoader extends AbstractComponentLoader<ActiveOnlyCheckbox> {
@@ -29,7 +29,12 @@ public class ActiveOnlyCheckboxLoader extends AbstractComponentLoader<ActiveOnly
         loadBoolean(element, "initialValue", resultComponent::setInitialValue);
         loadString(element, "dataLoader", resultComponent::setDataLoader);
 
+        if (resultComponent.getDataLoader() == null) {
+            throw new ActiveOnlyCheckboxException("Mandatory property 'dataLoader' is not set for ActiveOnlyCheckbox component");
+        }
+
         loadLoader(resultComponent.getDataLoader());
+        validateAttributes(resultComponent);
     }
 
     protected DataLoaderSupport getDataLoaderSupport() {
@@ -47,5 +52,27 @@ public class ActiveOnlyCheckboxLoader extends AbstractComponentLoader<ActiveOnly
             throw new GuiDevelopmentException("Not supported loader type: %", loaderId);
         }
     }
+
+    protected void validateAttributes(ActiveOnlyCheckbox component) {
+        MetaClass metaClass = component.getLoader().getContainer().getEntityMetaClass();
+
+        MetaProperty activeProperty = checkProperty(metaClass, component.getActiveField());
+        Class<?> type = activeProperty.getJavaType();
+        if (!type.equals(Boolean.class)) {
+            throw new ActiveOnlyCheckboxException("Active field must be 'Boolean'");
+        }
+
+        checkProperty(metaClass, component.getOrderByField());
+    }
+
+    private MetaProperty checkProperty(MetaClass metaClass, String property) {
+        MetaProperty metaProperty = metaClass.findProperty(property);
+
+        if (metaProperty == null) {
+            throw new ActiveOnlyCheckboxException("No such attribute: " + property);
+        }
+        return metaProperty;
+    }
+
 
 }
