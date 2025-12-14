@@ -1,33 +1,31 @@
 package com.digitilius.jmix.addon.component;
 
-import com.digitilius.jmix.addon.ApplicationContextProvider;
-import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
-import io.jmix.flowui.data.SupportsValueSource;
-import io.jmix.flowui.data.ValueSource;
 import io.jmix.flowui.model.CollectionLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActiveOnlyCheckbox extends JmixCheckbox implements SupportsValueSource<Boolean> {
+public class ActiveOnlyCheckbox extends JmixCheckbox {
 
     private static final Logger log = LoggerFactory.getLogger(ActiveOnlyCheckbox.class);
 
     private CollectionLoader<?> loader;
     private String dataLoader;
-
-    private String activeField = "active";
-    private String orderByField = "name";
-    private OrderDirection orderDirection = OrderDirection.ASC;
-    private boolean initialValue = false;
-
+    private String activeField;
+    private String orderByField;
+    private OrderDirection orderDirection;
     private String queryActiveOnly;
     private String queryAll;
-
-    private boolean listenerAttached = false;
     private boolean queriesInitialized = false;
+
+    public ActiveOnlyCheckbox() {
+        addValueChangeListener(e -> {
+            Boolean v = e.getValue();
+            applyFilter(Boolean.TRUE.equals(v));
+        });
+        getElement().getStyle().set("align-self", "center");
+    }
 
     public void setLoader(CollectionLoader<?> loader) {
         this.loader = loader;
@@ -57,8 +55,8 @@ public class ActiveOnlyCheckbox extends JmixCheckbox implements SupportsValueSou
         return orderByField;
     }
 
-    public void setInitialValue(boolean initialValue) {
-        this.initialValue = initialValue;
+    public OrderDirection getOrderDirection() {
+        return orderDirection;
     }
 
     public String getDataLoader() {
@@ -69,35 +67,12 @@ public class ActiveOnlyCheckbox extends JmixCheckbox implements SupportsValueSou
         this.orderDirection = OrderDirection.valueOf(orderDirection);
     }
 
-
-    @Override
-    public void initComponent() {
-        super.initComponent();
-
-        if (!listenerAttached) {
-            addValueChangeListener(e -> {
-                Boolean v = e.getValue();
-                applyFilter(v != null && v);
-            });
-            listenerAttached = true;
-        }
-        getElement().getStyle().set("align-self", "center");
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        super.afterPropertiesSet();
-
-        if (getLabel() == null) {
-            Messages messages = ApplicationContextProvider.getApplicationContext().getBean(Messages.class);
-            String label = messages.getMessage("activeOnly.label");
-            setLabel(label);
-        }
-        setValue(initialValue);
-
-    }
-
     private void applyFilter(boolean activeOnly) {
+        if (loader == null) {
+            log.info("Loader isn't set yet");
+            return;
+        }
+
         if (!queriesInitialized) {
             queryActiveOnly = buildQuery(true);
             queryAll = buildQuery(false);
