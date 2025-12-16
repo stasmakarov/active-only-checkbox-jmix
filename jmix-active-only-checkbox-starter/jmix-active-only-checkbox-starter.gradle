@@ -1,5 +1,3 @@
-archivesBaseName = 'jmix-active-only-checkbox-starter'
-
 jmix {
     entitiesEnhancing {
         enabled = false

@@ -8,7 +8,7 @@ buildscript {
 }
 
 group = 'com.digitilius.jmix'
-version = '1.0.0'
+version = '1.0.0-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java-library'
@@ -30,7 +30,7 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
 
-    def archName = project.findProperty('archivesBaseName')?.toString() ?: project.name
+    def archName = project.name
 
     java {
         withSourcesJar()
@@ -42,7 +42,7 @@ subprojects {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/" +
                         (System.getenv("GITHUB_REPOSITORY")
-                                ?: "stasmakarov/active-only-checkbox-jmix"))
+                                ?: "stasmakarov/jmix-active-only-checkbox-addon"))
 
                 credentials {
                     username = project.findProperty("gpr.user")

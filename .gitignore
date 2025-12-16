@@ -1,5 +1,6 @@
-.jmix
 
+.jmix
+gradle.properties
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

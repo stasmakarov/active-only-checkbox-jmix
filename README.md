@@ -36,14 +36,14 @@ without writing custom filtering logic for each screen.
 
 The following table shows which version of the add-on is compatible with which version of the platform:
 
-| Jmix Version | Add-on Version | Implementation                                                     |
-|--------------|----------------|--------------------------------------------------------------------|
-| 2.7.0+       | 1.0.0          | com.digitilius.jmix:aoc-starter:1.0.0                              |
+| Jmix Version | Add-on Version | Implementation                        |
+|--------------|----------------|---------------------------------------|
+| 2.7.0+       | 1.0.0          | com.digitilius.jmix:aoc-starter:1.0.0 |
 
 For manual installation, add the following dependencies to your `build.gradle`:
 
 ```groovy
- implementation 'com.digitilius.jmix:aoc-starter:<addon-version>'
+     implementation 'com.digitilius.jmix:jmix-active-only-checkbox-starter:<addon-version>'
 ```
 
 ## Using the Addon
