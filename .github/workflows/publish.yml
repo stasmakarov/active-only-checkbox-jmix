@@ -1,4 +1,4 @@
-name: Publish Package
+name: Publish Package for addon
 on:
   push:
     tags:
