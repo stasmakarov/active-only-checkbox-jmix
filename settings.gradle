@@ -1,8 +1,4 @@
-rootProject.name = 'jmix-active-only-checkbox-addon'
+rootProject.name = "jmix-active-only-checkbox-repo"
 
-include 'jmix-active-only-checkbox'
-include 'jmix-active-only-checkbox-starter'
-
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
-}
+includeBuild("addon")
+includeBuild("demo")

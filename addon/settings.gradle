@@ -1,0 +1,8 @@
+rootProject.name = 'jmix-active-only-checkbox-addon'
+
+include 'jmix-active-only-checkbox'
+include 'jmix-active-only-checkbox-starter'
+
+rootProject.children.each { p1 ->
+    p1.buildFileName = "${p1.name}.gradle"
+}
